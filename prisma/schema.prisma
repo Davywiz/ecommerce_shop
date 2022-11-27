@@ -1,0 +1,111 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email    String   @unique
+  username String
+  hash     String
+  type     UserType @default(USER)
+
+  firstName    String?
+  lastName     String?
+  address      String?
+  ratingsGiven Ratings[]
+
+  hashedRt String?
+
+  cart Cart?
+
+  @@map("users")
+}
+
+model Cart {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId   Int        @unique
+  user     User       @relation(fields: [userId], references: [id])
+  CartItem CartItem[]
+
+  @@map("cart")
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quantity Int
+
+  cartId Int
+  cart   Cart @relation(fields: [cartId], references: [id])
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([cartId, productId])
+  @@map("cartItem")
+}
+
+model Product {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  name        String   @unique
+  price       Int
+  quantity    Int
+  description String
+  images      String[]
+
+  rating   Ratings[]
+  cartItem CartItem[]
+
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  @@map("products")
+}
+
+model Category {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  Product Product[]
+}
+
+model Ratings {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  userId      Int
+  user        User @relation(fields: [userId], references: [id])
+  givenRating Int
+
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+  @@map("ratings")
+}
+
+//types
+enum UserType {
+  ADMIN
+  USER
+}
