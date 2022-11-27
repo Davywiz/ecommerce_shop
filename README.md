@@ -15,3 +15,5 @@
   <li>Postgre Sql</li>
   </ul>
   
+<p> NB:</p>
+<p>Run seed script with: "npm run seed"</p>
